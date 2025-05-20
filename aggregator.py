@@ -133,7 +133,8 @@ def verify_signature(symbol, price, timestamp, signature, address, message_hash_
         message = f"{symbol}:{price}:{timestamp}"
 
         message_encoded = encode_defunct(text=message)
-        message_hash = message_encoded.hash  # again, use .hash here too
+        # Use your manual hash if it worked locally, or switch to message_encoded.hash
+        message_hash = w3.keccak(message_encoded.body)
 
         if message_hash.hex() != message_hash_hex:
             logger.warning(f"⚠️ Hash mismatch for address {address}")
@@ -147,6 +148,7 @@ def verify_signature(symbol, price, timestamp, signature, address, message_hash_
     except Exception as e:
         logger.error(f"[Signature Error] {e}")
         return False
+
 
 connected_nodes_ip: Dict[str, WebSocket] = {}
 @app.websocket("/ws")
