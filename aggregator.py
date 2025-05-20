@@ -109,18 +109,40 @@ def is_registered_oracle(nodeaddress):
         return False
 
 
+# def verify_signature(symbol, price, timestamp, signature, address, message_hash_hex):
+#     try:
+#         message = f"{symbol}:{price}:{timestamp}"
+
+#         message_encoded = encode_defunct(text= message)
+#         message_hash = w3.keccak(message_encoded.body)
+
+#         if message_hash.hex() != message_hash_hex:
+#             logger.warning(f"⚠️ Hash mismatch for address {address}")
+#             return False 
+        
+#         recovered = w3.eth.account.recover_message(message_encoded, signature= signature)
+#         logger.info(f"Recovered address: {recovered}")
+
+#         return recovered.lower() == address.lower()
+
+#     except Exception as e:
+#         logger.error(f"[Signature Error] {e}")
+#         return False
+
+
 def verify_signature(symbol, price, timestamp, signature, address, message_hash_hex):
     try:
         message = f"{symbol}:{price}:{timestamp}"
-
-        message_encoded = encode_defunct(text= message)
-        message_hash = w3.keccak(message_encoded.body)
+        message_encoded = encode_defunct(text=message)
+        
+        # use the precomputed message hash from encode_defunct
+        message_hash = message_encoded.messageHash
 
         if message_hash.hex() != message_hash_hex:
             logger.warning(f"⚠️ Hash mismatch for address {address}")
             return False 
-        
-        recovered = w3.eth.account.recover_message(message_encoded, signature= signature)
+
+        recovered = w3.eth.account.recover_message(message_encoded, signature=signature)
         logger.info(f"Recovered address: {recovered}")
 
         return recovered.lower() == address.lower()
