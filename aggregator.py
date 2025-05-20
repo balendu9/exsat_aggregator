@@ -129,7 +129,6 @@ def is_registered_oracle(nodeaddress):
 #         logger.error(f"[Signature Error] {e}")
 #         return False
 
-
 def verify_signature(symbol, price, timestamp, signature, address, message_hash_hex):
     try:
         message = f"{symbol}:{price}:{timestamp}"
@@ -150,7 +149,6 @@ def verify_signature(symbol, price, timestamp, signature, address, message_hash_
     except Exception as e:
         logger.error(f"[Signature Error] {e}")
         return False
-
 
 connected_nodes_ip: Dict[str, WebSocket] = {}
 @app.websocket("/ws")
