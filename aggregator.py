@@ -109,57 +109,26 @@ def is_registered_oracle(nodeaddress):
         return False
 
 
-# def verify_signature(symbol, price, timestamp, signature, address, message_hash_hex):
-#     try:
-#         message = f"{symbol}:{price}:{timestamp}"
-
-#         message_encoded = encode_defunct(text= message)
-#         message_hash = w3.keccak(message_encoded.body)
-
-#         if message_hash.hex() != message_hash_hex:
-#             logger.warning(f"⚠️ Hash mismatch for address {address}")
-#             return False 
-        
-#         recovered = w3.eth.account.recover_message(message_encoded, signature= signature)
-#         logger.info(f"Recovered address: {recovered}")
-
-#         return recovered.lower() == address.lower()
-
-#     except Exception as e:
-#         logger.error(f"[Signature Error] {e}")
-#         return False
-
-
 def verify_signature(symbol, price, timestamp, signature, address, message_hash_hex):
     try:
-        # Rebuild the exact message as on the node
         message = f"{symbol}:{price}:{timestamp}"
 
-        # Encode it the same way
-        message_encoded = encode_defunct(text=message)
+        message_encoded = encode_defunct(text= message)
+        message_hash = w3.keccak(message_encoded.body)
 
-        # Hash it manually like the node does
-        calculated_hash = w3.keccak(message_encoded.body)
-
-        # Check the hash
-        if calculated_hash.hex() != message_hash_hex:
-            
-            return False
-
-        # If signature is hex string, decode it
-        if isinstance(signature, str) and signature.startswith("0x"):
-            signature = bytes.fromhex(signature[2:])
-
-        # Recover address
-        recovered = w3.eth.account.recover_message(message_encoded, signature=signature)
-
+        if message_hash.hex() != message_hash_hex:
+            logger.warning(f"⚠️ Hash mismatch for address {address}")
+            return False 
         
+        recovered = w3.eth.account.recover_message(message_encoded, signature= signature)
+        logger.info(f"Recovered address: {recovered}")
 
         return recovered.lower() == address.lower()
 
     except Exception as e:
         logger.error(f"[Signature Error] {e}")
         return False
+
 
 connected_nodes_ip: Dict[str, WebSocket] = {}
 @app.websocket("/ws")
