@@ -130,29 +130,32 @@ def is_registered_oracle(nodeaddress):
 #         return False
 
 
-
 def verify_signature(symbol, price, timestamp, signature, address, message_hash_hex):
     try:
-        # Reconstruct the original message string
+        # Rebuild the exact message as on the node
         message = f"{symbol}:{price}:{timestamp}"
 
-        # Encode the message to match node's format
+        # Encode it the same way
         message_encoded = encode_defunct(text=message)
 
-        # Manually hash it like the node does
+        # Hash it manually like the node does
         calculated_hash = w3.keccak(message_encoded.body)
 
-        # Compare hashes
+        # Check the hash
         if calculated_hash.hex() != message_hash_hex:
-            logger.warning(f"⚠️ Hash mismatch for address {address}")
+            
             return False
 
-        # Recover address from signature
-        recovered_address = w3.eth.account.recover_message(message_encoded, signature=signature)
+        # If signature is hex string, decode it
+        if isinstance(signature, str) and signature.startswith("0x"):
+            signature = bytes.fromhex(signature[2:])
 
-        logger.info(f"[✅] Recovered: {recovered_address} | Claimed: {address}")
+        # Recover address
+        recovered = w3.eth.account.recover_message(message_encoded, signature=signature)
 
-        return recovered_address.lower() == address.lower()
+        
+
+        return recovered.lower() == address.lower()
 
     except Exception as e:
         logger.error(f"[Signature Error] {e}")
